@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Delegate Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .nav-bar {
+            background-color: #343a40;
+        }
+        .nav-bar a {
+            color: #fff;
+        }
+        .card {
+            margin-top: 20px;
+        }
+        .logout-btn {
+            background-color: #dc3545; /* أحمر */
+            border-color: #dc3545;
+        }
+        .logout-btn:hover {
+            background-color: #c82333; /* لون أغمق عند التحويم */
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Section -->
+    <div class="container mt-5" id="login-section">
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title text-center" data-en="Delegate Login" data-bn="প্রতিনিধি লগইন">Delegate Login</h3>
+                <form id="login-form">
+                    <div class="mb-3">
+                        <label for="delegateName" class="form-label" data-en="Name" data-bn="নাম">Name</label>
+                        <input type="text" class="form-control" id="delegateName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="delegatePhone" class="form-label" data-en="Phone Number" data-bn="ফোন নম্বর">Phone Number</label>
+                        <input type="text" class="form-control" id="delegatePhone" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" data-en="Login" data-bn="লগইন">Login</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar nav-bar navbar-expand-lg navbar-dark d-none" id="main-nav">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Delegate App</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#attendance">Attendance</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#cash">Cash Submission</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#location">Location Sharing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="toggleLanguage()">Switch to Bengali</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="btn logout-btn" onclick="logout()">Logout</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4 d-none" id="main-content">
+        <!-- Attendance Section -->
+        <div id="attendance" class="card">
+            <div class="card-body">
+                <h5 class="card-title" data-en="Attendance" data-bn="উপস্থিতি">Attendance</h5>
+                <button class="btn btn-success" onclick="markAttendance('in')" data-en="Mark Check-In" data-bn="চেক-ইন করুন">Mark Check-In</button>
+                <button class="btn btn-danger" onclick="markAttendance('out')" data-en="Mark Check-Out" data-bn="চেক-আউট করুন">Mark Check-Out</button>
+                <p class="mt-3" id="attendance-status"></p>
+            </div>
+        </div>
+
+        <!-- Cash Submission Section -->
+        <div id="cash" class="card">
+            <div class="card-body">
+                <h5 class="card-title" data-en="Cash Submission" data-bn="নগদ জমা">Cash Submission</h5>
+                <form id="cash-form">
+                    <div class="mb-3">
+                        <label for="cashAmount" class="form-label" data-en="Amount (SAR)" data-bn="পরিমাণ (SAR)">Amount (SAR)</label>
+                        <input type="number" class="form-control" id="cashAmount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cashReceipt" class="form-label" data-en="Upload Receipt" data-bn="রসিদ আপলোড করুন">Upload Receipt</label>
+                        <input type="file" class="form-control" id="cashReceipt" accept="image/*">
+                    </div>
+                    <button type="submit" class="btn btn-primary" data-en="Submit" data-bn="জমা দিন">Submit</button>
+                </form>
+                <p class="mt-3" id="cash-status"></p>
+            </div>
+        </div>
+
+        <!-- Location Sharing Section -->
+        <div id="location" class="card">
+            <div class="card-body">
+                <h5 class="card-title" data-en="Location Sharing" data-bn="অবস্থান ভাগ করা">Location Sharing</h5>
+                <button class="btn btn-primary" onclick="startLocationSharing()" data-en="Start Sharing" data-bn="শেয়ারিং শুরু করুন">Start Sharing</button>
+                <button class="btn btn-secondary" onclick="stopLocationSharing()" data-en="Stop Sharing" data-bn="শেয়ারিং বন্ধ করুন">Stop Sharing</button>
+                <p class="mt-3" id="location-status"></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentLanguage = 'en';
+        let isLoggedIn = false;
+
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'bn' : 'en';
+            document.querySelectorAll('[data-en]').forEach(element => {
+                element.textContent = element.getAttribute(`data-${currentLanguage}`);
+            });
+        }
+
+        function logout() {
+            isLoggedIn = false;
+            document.getElementById('main-nav').classList.add('d-none');
+            document.getElementById('login-section').classList.remove('d-none');
+            alert(currentLanguage === 'en' ? 'Logged out successfully.' : 'বিদায়ের জন্য সফল।');
+        }
+
+        // Handle Login
+        document.getElementById('login-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const name = document.getElementById('delegateName').value;
+            const phone = document.getElementById('delegatePhone').value;
+
+            if (name && phone) {
+                isLoggedIn = true;
+                document.getElementById('login-section').classList.add('d-none');
+                document.getElementById('main-nav').classList.remove('d-none');
+                document.getElementById('main-content').classList.remove('d-none');
+            } else {
+                alert(currentLanguage === 'en' ? 'Please enter all fields.' : 'অনুগ্রহ করে সব তথ্য প্রবেশ করুন।');
+            }
+        });
+
+        // Mark Attendance
+        function markAttendance(type) {
+            const statusElement = document.getElementById('attendance-status');
+            const now = new Date().toLocaleString();
+            if (type === 'in') {
+                statusElement.textContent = currentLanguage === 'en' ? `Checked in at ${now}` : `${now} এ চেক-ইন হয়েছে`;
+            } else {
+                statusElement.textContent = currentLanguage === 'en' ? `Checked out at ${now}` : `${now} এ চেক-আউট হয়েছে`;
+            }
+        }
+
+        // Handle Cash Submission
+        document.getElementById('cash-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const amount = document.getElementById('cashAmount').value;
+            const receipt = document.getElementById('cashReceipt').files[0];
+            if (amount && receipt) {
+                document.getElementById('cash-status').textContent = currentLanguage === 'en' ? `Submitted SAR ${amount} with receipt.` : `রসিদের সাথে ${amount} SAR জমা দেওয়া হয়েছে।`;
+            } else {
+                document.getElementById('cash-status').textContent = currentLanguage === 'en' ? 'Please fill in all fields.' : 'সব তথ্য পূরণ করুন।';
+            }
+        });
+
+        // Location Sharing
+        let locationInterval;
+
+        function startLocationSharing() {
+            if (navigator.geolocation) {
+                locationInterval = setInterval(() => {
+                    navigator.geolocation.getCurrentPosition(position => {
+                        const { latitude, longitude } = position.coords;
+                        document.getElementById('location-status').textContent = currentLanguage === 'en' ? `Sharing location: (${latitude}, ${longitude})` : `অবস্থান ভাগ করা হচ্ছে: (${latitude}, ${longitude})`;
+                    });
+                }, 5000);
+            } else {
+                document.getElementById('location-status').textContent = currentLanguage === 'en' ? 'Geolocation is not supported by your browser.' : 'জিওলোকেশন আপনার ব্রাউজারে সমর্থিত নয়।';
+            }
+        }
+
+        function stopLocationSharing() {
+            clearInterval(locationInterval);
+            document.getElementById('location-status').textContent = currentLanguage === 'en' ? 'Location sharing stopped.' : 'অবস্থান ভাগ করা বন্ধ হয়েছে।';
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
